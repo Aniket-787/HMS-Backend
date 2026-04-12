@@ -135,9 +135,9 @@ async function getAdmins(req,res){
 
 async function getAllPatients(req,res){
     try {
-        const patient = patientModel.find()||0;
+        const patients = await patientModel.find()||0;
         res.status(200).json({
-            patient
+            patients
         })
     } catch (error) {
        res.status(500).json({
