@@ -1,0 +1,80 @@
+const mongoose = require("mongoose");
+
+const opdSchema = new mongoose.Schema(
+  {
+    patientId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Patient",
+      required: true,
+    },
+
+    doctorId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+    },
+
+    hospitalId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Hospital",
+      required: true,
+    },
+
+    visitDate: {
+      type: Date,
+      default: Date.now,
+    },
+
+    tokenNumber: {
+      type: Number,
+      required: true,
+    },
+
+    status: {
+      type: String,
+      enum: ["WAITING","COMPLETED"],
+      default: "WAITING",
+    },
+
+    symptoms: {
+      type: String,
+    },
+
+    diagnosis: {
+      type: String,
+    },
+
+    medicines: [
+      {
+        name: String,
+        dosage: String,
+        duration: String,
+      },
+    ],
+
+    notes: {
+      type: String,
+    },
+
+    // 🔮 future ready
+    followUpDate: {
+      type: Date,
+    },
+
+    attachments: [
+      {
+        type: String, // file URL later
+      },
+    ],
+  },
+  {
+    timestamps: true,
+  }
+);
+
+// 🔥 Important index for token logic
+opdSchema.index({ doctorId: 1, visitDate: 1, tokenNumber: 1 });
+
+const opdModel = mongoose.model("OPD", opdSchema);
+
+module.exports = opdModel;
