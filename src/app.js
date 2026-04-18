@@ -13,7 +13,7 @@ app.use(cookieParser());
 
 app.use(cors({
   origin: [
-    "https://hms-frontend-oz5lnh1zr-aniketwagh878-6358s-projects.vercel.app"
+    "https://hms-frontend-black.vercel.app"
   ],
   credentials: true
 }));
