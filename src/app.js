@@ -12,7 +12,10 @@ app.use(express.json());
 app.use(cookieParser());
 
 app.use(cors({
-  origin: "https://hms-frontend-black.vercel.app",
+  origin: [
+    "https://hms-frontend-black.vercel.app",
+    "http://localhost:3002"
+  ],
   credentials: true
 }));
 

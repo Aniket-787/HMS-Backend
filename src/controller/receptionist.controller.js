@@ -1,7 +1,7 @@
 const opdModel = require("../models/opd.model");
 const patientModel = require("../models/patient.model");
 const userModel = require("../models/user.model");
-
+const hospitalModel = require("../models/hospital.model");
 async function registerPatient(req, res) {
   try {
     const {
@@ -21,6 +21,17 @@ async function registerPatient(req, res) {
       });
     }
 
+    // 🔥 get hospital
+   const hospital = await hospitalModel.findById(hospitalId);
+
+   // count patients
+   const count = await patientModel.countDocuments({ hospitalId });
+
+   const nextNumber = count + 1;
+
+   // generate UHID
+   const uhid = `${hospital.hospitalCode}-${String(nextNumber).padStart(4, "0")}`;
+
     const patient = await patientModel.create({
       name,
       phone,
@@ -30,6 +41,7 @@ async function registerPatient(req, res) {
       bloodGroup,
       allergies,
       emergencyContact,
+      uhid
     });
 
     res.status(200).json({
@@ -76,13 +88,27 @@ async function getPatientList(req,res){
 }
 async function registerOPD(req, res) {
   try {
-    const { patientId, doctorId, symptoms } = req.body;
+    const { patientId, doctorId, symptoms, paymentStatus } = req.body;
     const hospitalId = req.user.hospitalId;
 
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-    const patientDetails = await patientModel.findOne({patientId:patientId});
-    console.log(patientDetails)
+
+    // 🔥 FIX: correct patient fetch
+    const patientDetails = await patientModel.findById(patientId);
+
+    if (!patientDetails) {
+      return res.status(404).json({ message: "Patient not found" });
+    }
+
+    // 🔥 Get doctor
+    const doctor = await userModel.findById(doctorId);
+
+    if (!doctor) {
+      return res.status(404).json({ message: "Doctor not found" });
+    }
+
+    // 🔥 Token logic
     const lastOPD = await opdModel
       .findOne({
         doctorId,
@@ -93,13 +119,40 @@ async function registerOPD(req, res) {
 
     const tokenNumber = lastOPD ? lastOPD.tokenNumber + 1 : 1;
 
+    // 🔥 Get last OPD of this patient with same doctor
+    const lastPatientOPD = await opdModel
+      .findOne({
+        patientId,
+        doctorId,
+        hospitalId,
+      })
+      .sort({ createdAt: -1 });
+
+    // 🔥 Default = consultation fee
+    let amount = doctor.profile?.consultationFee || 0;
+
+    // 🔥 FOLLOW-UP LOGIC
+    if (lastPatientOPD && lastPatientOPD.followUpDate) {
+      const validTill = new Date(lastPatientOPD.followUpDate);
+      validTill.setDate(validTill.getDate() + 10); // 10 days validity
+
+      const currentDate = new Date();
+
+      if (currentDate <= validTill) {
+        amount = doctor.profile?.followUpFee || 0;
+      }
+    }
+
+    // 🔥 Create OPD (with billing)
     const OPD = await opdModel.create({
-      patientDetails,
       patientId,
       doctorId,
       hospitalId,
       tokenNumber,
       symptoms,
+
+      amount,
+      paymentStatus: paymentStatus || "UNPAID",
     });
 
     res.status(200).json({

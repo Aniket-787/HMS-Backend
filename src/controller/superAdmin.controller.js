@@ -6,12 +6,17 @@ const bcrypt = require('bcrypt');
 async function createHospital(req,res){
     try {
           const{name, address, email, phone} = req.body;
-    
+    const hospitalCode = name
+  .replace(/[^a-zA-Z]/g, "")
+  .toUpperCase()
+  .slice(0, 4);
+
     const createHospital = hospitalModel.create({
         name,
         address,
         email,
         phone,
+        hospitalCode,
         admin : null
     })
 

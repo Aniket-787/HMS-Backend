@@ -2,6 +2,7 @@ const express = require('express');
 const authMiddleware = require('../middleware/authMiddleware');
 const roleMiddleware = require('../middleware/roleMiddleware')
 const adminController = require('../controller/admin.controller')
+const bedController = require('../controller/bed.controller')
 
 const router = express.Router();
 
@@ -31,4 +32,15 @@ router.get('/patients',authMiddleware,roleMiddleware.roleMiddleware('ADMIN'),adm
 
 //GET: get all appointments
 router.get('/appointments',authMiddleware,roleMiddleware.roleMiddleware("ADMIN"),adminController.getAppointments)
+
+//POST: Add bed details
+router.post('/createbed',authMiddleware,roleMiddleware.roleMiddleware("ADMIN"),bedController.createBed)
+
+
+//GET: get all beds
+router.get('/beds',authMiddleware,roleMiddleware.roleMiddleware("ADMIN"),bedController.getBeds)
+
+//GET: get hospital details
+router.get('/hospital',authMiddleware,roleMiddleware.roleMiddleware("ADMIN","DOCTOR"),adminController.getHospital)
+
 module.exports = router;

@@ -33,6 +33,11 @@ const hospitalSchema = new mongoose.Schema(
       type:String
     },
 
+    hospitalCode: {
+      type: String,
+      unique: true,
+    },
+
     status: {
       type: String,
       enum: ["ACTIVE", "INACTIVE"],

@@ -6,7 +6,7 @@ const bcrypt = require('bcrypt');
 
 async function createDoctor(req,res){
     try {
-        const {name, email, password, phone, specialization, experience} = req.body;
+        const {name, email, password, phone, specialization, experience, consultationFee, followUpFee } = req.body;
 
         const hospitalId = req.user.hospitalId;
 
@@ -26,8 +26,12 @@ async function createDoctor(req,res){
             phone,
             role:"DOCTOR",
             hospitalId:hospitalId,
+            profile: {
             specialization,
-            experience
+            experience,
+            consultationFee,
+            followUpFee
+      }
         });
 
         res.status(200).json({
@@ -218,6 +222,28 @@ async function getAppointments(req,res){
         })
     }
 }
+
+async function getHospital(req,res){
+    try {
+        const hospitalId = req.user.hospitalId;
+        const hospital = await hospitalModel.findById(hospitalId);
+        
+        if(!hospital){
+            return res.status(404).json({
+                message:"Hospital not found!"
+            })
+        }
+
+        res.status(200).json({
+            hospital
+        })
+    } catch (error) {
+        res.status(500).json({
+            message:error.message
+        })
+    }
+}
+
 module.exports = {
      createDoctor,
      createReceptionist,
@@ -227,7 +253,8 @@ module.exports = {
      getDoctorById,
      getReceptionistById,
      getPatients,
-     getAppointments 
+     getAppointments,
+     getHospital
     }
 
 

@@ -20,6 +20,18 @@ const opdSchema = new mongoose.Schema(
       required: true,
     },
 
+    // 💰 BILLING (IMPROVED)
+    amount: {
+      type: Number,
+      required: true,
+    },
+
+    paymentStatus: {
+      type: String,
+      enum: ["PAID", "UNPAID"],
+      default: "UNPAID",
+    },
+
     visitDate: {
       type: Date,
       default: Date.now,
@@ -32,7 +44,7 @@ const opdSchema = new mongoose.Schema(
 
     status: {
       type: String,
-      enum: ["WAITING","COMPLETED"],
+      enum: ["WAITING", "COMPLETED"],
       default: "WAITING",
     },
 
@@ -56,14 +68,14 @@ const opdSchema = new mongoose.Schema(
       type: String,
     },
 
-    // 🔮 future ready
+    // 🔥 VERY IMPORTANT (your logic)
     followUpDate: {
       type: Date,
     },
 
     attachments: [
       {
-        type: String, // file URL later
+        type: String,
       },
     ],
   },

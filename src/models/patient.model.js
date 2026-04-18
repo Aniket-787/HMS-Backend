@@ -25,6 +25,12 @@ const patientSchema = new mongoose.Schema(
       required: true,
     },
 
+    uhid:{
+      type: String,
+      unique: true,
+      trim: true,
+    },
+
     hospitalId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Hospital",

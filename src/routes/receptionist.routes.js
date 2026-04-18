@@ -13,7 +13,7 @@ router.post('/patient',authMiddleware,roleMiddleware.roleMiddleware("RECEPTIONIS
 router.get('/search/patient',authMiddleware,roleMiddleware.roleMiddleware("RECEPTIONIST"),receptionistController.getPatient)
 
 //GET: get patientList
-router.get('/patientlist',authMiddleware, roleMiddleware.roleMiddleware('RECEPTIONIST'),receptionistController.getPatientList)
+router.get('/patientlist',authMiddleware, roleMiddleware.roleMiddleware('RECEPTIONIST','DOCTOR'),receptionistController.getPatientList)
 //POST: register OPD
 router.post('/opd',authMiddleware,roleMiddleware.roleMiddleware("RECEPTIONIST"),receptionistController.registerOPD)
 
@@ -23,7 +23,7 @@ router.get('/opdlist',authMiddleware,roleMiddleware.roleMiddleware("RECEPTIONIST
 //GET: get opd by id
 router.get('/opd/:id',authMiddleware,roleMiddleware.roleMiddleware("RECEPTIONIST"),receptionistController.getOpdById)
 
-router.get('/doctorslist',authMiddleware,roleMiddleware.roleMiddleware("RECEPTIONIST"),receptionistController.getDoctors)
+router.get('/doctorslist',authMiddleware,roleMiddleware.roleMiddleware("RECEPTIONIST","DOCTOR"),receptionistController.getDoctors)
 
 //GET: pending Appointments
 router.get('/pending',authMiddleware,roleMiddleware.roleMiddleware("RECEPTIONIST"),receptionistController.pendingAppointments)

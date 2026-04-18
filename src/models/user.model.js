@@ -11,7 +11,6 @@ const userSchema = new mongoose.Schema(
     email: {
       type: String,
       required: true,
-      unique: true, // globally unique 
       lowercase: true,
       trim: true,
     },
@@ -21,10 +20,10 @@ const userSchema = new mongoose.Schema(
       required: true,
     },
 
-    phone:{
-      type:Number,
-      required:true,
-      unique:true,
+    phone: {
+      type: String, // 🔥 changed
+      required: true,
+      trim: true,
     },
 
     role: {
@@ -49,14 +48,29 @@ const userSchema = new mongoose.Schema(
     },
 
     profile: {
-      specialization: String, // for doctor
+      specialization: String,
       experience: Number,
+
+      // 💰 fees moved here
+      consultationFee: {
+        type: Number,
+        default: 0,
+      },
+
+      followUpFee: {
+        type: Number,
+        default: 0,
+      },
     },
   },
   {
     timestamps: true,
   }
 );
+
+// 🔥 Optional (better uniqueness)
+userSchema.index({ email: 1, hospitalId: 1 }, { unique: true });
+userSchema.index({ phone: 1, hospitalId: 1 }, { unique: true });
 
 const userModel = mongoose.model("User", userSchema);
 
