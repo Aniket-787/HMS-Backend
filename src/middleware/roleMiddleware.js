@@ -3,8 +3,7 @@
  function roleMiddleware(...allowedRoles){
     return (req,res,next)=>{
         try {
-            const userRole = req.user.role;
-
+            const userRole = req.user.role;                
             if(!allowedRoles.includes(userRole)){
                 return res.status(403).json({
                     message:"Access denied!"

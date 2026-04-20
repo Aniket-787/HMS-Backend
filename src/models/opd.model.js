@@ -52,6 +52,14 @@ const opdSchema = new mongoose.Schema(
       type: String,
     },
 
+    generalExamination:{
+      type:String
+    },
+
+    Investigation:{
+      type:String
+    },
+
     diagnosis: {
       type: String,
     },

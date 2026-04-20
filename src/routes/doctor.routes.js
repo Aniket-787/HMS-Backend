@@ -30,7 +30,7 @@ router.get('/completed/patients', authMiddleware, roleMiddleware.roleMiddleware(
 router.get('/today/patients',authMiddleware,roleMiddleware.roleMiddleware("DOCTOR"),doctorController.todaysPatients)
 
 //POST: admit patient to IPD
-router.post('/admit/ipd',authMiddleware,roleMiddleware.roleMiddleware("DOCTOR"),ipdController.admitPatient)
+router.post('/admit/ipd',authMiddleware,roleMiddleware.roleMiddleware("DOCTOR", "RECEPTIONIST"),ipdController.admitPatient)
 
 //GET: All Admitted Patients
 router.get(
@@ -45,7 +45,7 @@ router.get(
 router.get(
   "/ipd/discharged",
   authMiddleware,
-  roleMiddleware.roleMiddleware("DOCTOR", "ADMIN"),
+  roleMiddleware.roleMiddleware("DOCTOR","ADMIN","RECEPTIONIST"),
   ipdController.getDischargePatients
 );
 
@@ -63,7 +63,7 @@ router.post(
 router.post(
   "/ipd/:ipdId/charges",
   authMiddleware,
-  roleMiddleware.roleMiddleware("DOCTOR", "ADMIN"),
+  roleMiddleware.roleMiddleware("DOCTOR", "ADMIN", "RECEPTIONIST"),
   ipdController.addCharges
 );
 

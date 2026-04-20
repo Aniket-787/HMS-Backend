@@ -1,11 +1,11 @@
 const patientModel = require('../models/patient.model');
 const bedModel = require('../models/bed.model');
-const ipdModel = require('../models/IPD.model')
+const ipdModel = require('../models/IPD.model');
 
 
 async function admitPatient(req, res) {
   try {
-    const { patientId, doctorId, wardType, isInsured, InsuranceNo, policyNo, Dignosis, complimentTo } = req.body;
+    const { patientId, doctorId, wardType, isInsured, InsuranceNo, policyNo, diagnosis, notes, complimentTo } = req.body;
     const hospitalId = req.user.hospitalId;
 
     // 🔍 Check patient
@@ -27,16 +27,31 @@ async function admitPatient(req, res) {
       });
     }
 
+    const lastIPD = await ipdModel.findOne({ hospitalId })
+  .sort({ createdAt: -1 });
+
+   let nextNumber = 1;
+
+  if (lastIPD && lastIPD.ipdNumber) {
+  const lastNumber = parseInt(lastIPD.ipdNumber.split("-")[1]);
+  nextNumber = lastNumber + 1;
+ }
+
+const ipdNumber = `IPD-${String(nextNumber).padStart(4, "0")}`;
+
     // 🔥 Create IPD
     const ipd = await ipdModel.create({
       patientId,
       doctorId,
       hospitalId,
       uhid: patient.uhid,
+      ipdNumber,
       wardType,
       isInsured,
       InsuranceNo,
       policyNo,
+      diagnosis,
+      notes,
       complimentTo,
       bedNumber: bed.bedNumber,
       bedId: bed._id,

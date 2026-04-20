@@ -1,6 +1,7 @@
 const hospitalModel = require('../models/hospital.model');
 const userModel = require('../models/user.model');
 const patientModel = require('../models/patient.model')
+const imagekit = require('../services/storage.service');
 const bcrypt = require('bcrypt');
 
 async function createHospital(req,res){
@@ -150,6 +151,42 @@ async function getAllPatients(req,res){
        }) 
     }
 }
+
+
+
+async function uploadHospitalLogo(req, res) {
+  try {
+    const file = req.file; // multer
+
+    if (!file) {
+      return res.status(400).json({
+        message: "No file uploaded",
+      });
+    }
+
+    const uploadResponse = await imagekit.upload({
+      file: file.buffer,
+      fileName: file.originalname,
+      folder:"HMS",
+    });
+
+    const hospital = await hospitalModel.findByIdAndUpdate(
+      req.user.hospitalId,
+      { logo: uploadResponse.url },
+      { new: true }
+    );
+
+    res.status(200).json({
+      message: "Logo uploaded successfully",
+      hospital,
+    });
+
+  } catch (error) {
+    res.status(500).json({
+      message: error.message,
+    });
+  }
+}
 module.exports = {
     createHospital,
     createAdmin,
@@ -157,5 +194,6 @@ module.exports = {
     getHospitalById,
     getAdmins,
     getAllStaff,
-    getAllPatients
+    getAllPatients,
+    uploadHospitalLogo
 }

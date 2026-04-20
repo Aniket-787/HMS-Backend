@@ -19,6 +19,10 @@ const hospitalSchema = new mongoose.Schema(
       required: true,
       unique:true,
       trim: true,
+      match: [
+     /^[6-9]\d{9}$/,
+     "Please enter a valid 10-digit mobile number",
+  ],
     },
 
     email: {
@@ -27,6 +31,10 @@ const hospitalSchema = new mongoose.Schema(
       lowercase: true,
       unique:true,
       trim: true,
+      match: [
+      /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+      "Please enter a valid email address",
+  ],
     },
 
     admin:{
@@ -37,6 +45,10 @@ const hospitalSchema = new mongoose.Schema(
       type: String,
       unique: true,
     },
+
+    logo: {
+      type: String, // Image URL from ImageKit
+   },
 
     status: {
       type: String,

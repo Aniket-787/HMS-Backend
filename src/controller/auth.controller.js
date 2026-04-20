@@ -54,7 +54,8 @@ async function loginUser(req,res){
             token,
             user:{
                 name:user.name,
-                role:user.role
+                role:user.role,
+                hospitalId:user.hospitalId
             }
          })
 

@@ -3,7 +3,9 @@ const authRoutes = require('./routes/authRoutes');
 const superAdminRoutes = require('./routes/superAdmin.routes');
 const adminRoutes = require('./routes/admin.routes');
 const receptionistRoutes = require('./routes/receptionist.routes');
+const dischargeSummeryRoutes = require('./routes/dischargeSummery.routes')
 const doctorRoutes = require('./routes/doctor.routes')
+const revenueRoutes = require('./routes/revenue.routes')
 const cookieParser = require('cookie-parser');
 const cors = require('cors');
 
@@ -13,7 +15,7 @@ app.use(cookieParser());
 
 app.use(cors({
   origin: [
-    "https://hms-frontend-black.vercel.app"
+    "https://hms-frontend-black.vercel.app",
   ],
   credentials: true
 }));
@@ -25,6 +27,11 @@ app.use('/api/superAdmin',superAdminRoutes)
 app.use('/api/admin',adminRoutes)
 app.use('/api/receptionist',receptionistRoutes)
 app.use('/api/doctor',doctorRoutes)
+app.use('/api/discharge',dischargeSummeryRoutes)
+app.use('/api/analytics',revenueRoutes)
+
+
+
 
 app.get("/", (req, res) => {
   res.send("Backend is LIVE 🚀");

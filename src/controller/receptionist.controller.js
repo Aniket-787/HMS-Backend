@@ -140,6 +140,7 @@ async function registerOPD(req, res) {
 
       if (currentDate <= validTill) {
         amount = doctor.profile?.followUpFee || 0;
+        console.log(amount)
       }
     }
 
@@ -191,7 +192,11 @@ async function getOPD(req,res){
 async function getOpdById(req,res){
     try {
         const opdId = req.params.id;
-        const opd = await opdModel.findOne({_id: opdId, hospitalId: req.user.hospitalId});
+        const opd = await opdModel
+          .findOne({_id: opdId, hospitalId: req.user.hospitalId})
+          .populate('patientId')
+          .populate('doctorId');
+
         if(!opd){
            return res.status(404).json({
                 message:"opd not found!"

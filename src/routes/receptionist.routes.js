@@ -18,7 +18,7 @@ router.get('/patientlist',authMiddleware, roleMiddleware.roleMiddleware('RECEPTI
 router.post('/opd',authMiddleware,roleMiddleware.roleMiddleware("RECEPTIONIST"),receptionistController.registerOPD)
 
 //GET: get OPDlist
-router.get('/opdlist',authMiddleware,roleMiddleware.roleMiddleware("RECEPTIONIST"),receptionistController.getOPD)
+router.get('/opdlist',authMiddleware,roleMiddleware.roleMiddleware("RECEPTIONIST","DOCTOR"),receptionistController.getOPD)
 
 //GET: get opd by id
 router.get('/opd/:id',authMiddleware,roleMiddleware.roleMiddleware("RECEPTIONIST"),receptionistController.getOpdById)

@@ -32,7 +32,7 @@ async function getQueue(req,res){
 async function updateOpd(req,res){
     try {
         const opdId  = req.params.id
-        const{diagnosis, medicines, notes} = req.body;
+        const{diagnosis, generalExamination, investigation, medicines, notes, followUpDate } = req.body;
 
         const opd = await opdModel.findOne({
             _id:opdId,
@@ -46,8 +46,11 @@ async function updateOpd(req,res){
             })
         }
         opd.diagnosis = diagnosis || opd.diagnosis;
+        opd.generalExamination = generalExamination || opd.generalExamination;
+        opd.investigation = investigation || opd.investigation
         opd.medicines = medicines || opd.medicines;
         opd.notes = notes || opd.notes;
+        opd.followUpDate = followUpDate || opd.followUpDate;
         opd.status = "COMPLETED"
 
        await opd.save();

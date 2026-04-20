@@ -38,9 +38,12 @@ router.post('/createbed',authMiddleware,roleMiddleware.roleMiddleware("ADMIN"),b
 
 
 //GET: get all beds
-router.get('/beds',authMiddleware,roleMiddleware.roleMiddleware("ADMIN"),bedController.getBeds)
+router.get('/beds',authMiddleware,roleMiddleware.roleMiddleware("ADMIN","RECEPTIONIST"),bedController.getBeds)
 
 //GET: get hospital details
-router.get('/hospital',authMiddleware,roleMiddleware.roleMiddleware("ADMIN","DOCTOR"),adminController.getHospital)
+router.get('/hospital',authMiddleware,roleMiddleware.roleMiddleware("ADMIN","DOCTOR","RECEPTIONIST"),adminController.getHospital)
+
+//GET: get hospital stats
+router.get('/hospital/stats',authMiddleware,roleMiddleware.roleMiddleware("ADMIN","DOCTOR","RECEPTIONIST"),adminController.getHospitalStats)
 
 module.exports = router;

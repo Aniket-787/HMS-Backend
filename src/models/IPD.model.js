@@ -1,5 +1,4 @@
 const mongoose = require("mongoose");
-const admitPatient = require("../controller/ipd.controller");
 
 const ipdSchema = new mongoose.Schema(
   {
@@ -24,6 +23,11 @@ const ipdSchema = new mongoose.Schema(
     uhid: {
       type: String,
       required: true,
+    },
+
+    ipdNumber: {
+    type: String,
+    unique: true,
     },
 
     isInsured:{
@@ -143,4 +147,4 @@ ipdSchema.index(
 
 const ipdModel = mongoose.model("IPD", ipdSchema);
 
-module.exports =  ipdModel
+module.exports =  ipdModel;

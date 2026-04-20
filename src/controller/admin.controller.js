@@ -2,6 +2,8 @@ const hospitalModel = require('../models/hospital.model');
 const opdModel = require('../models/opd.model');
 const patientModel = require('../models/patient.model');
 const userModel = require('../models/user.model');
+const ipdModel = require('../models/IPD.model');
+const bedModel = require('../models/bed.model');
 const bcrypt = require('bcrypt');
 
 async function createDoctor(req,res){
@@ -223,6 +225,64 @@ async function getAppointments(req,res){
     }
 }
 
+async function getHospitalStats(req,res){
+    try {
+        const hospitalId = req.user.hospitalId;
+
+        // Get total patients
+        const totalPatients = await patientModel.countDocuments({hospitalId});
+
+        // Get total doctors
+        const totalDoctors = await userModel.countDocuments({hospitalId, role: 'DOCTOR'});
+
+        // Get total receptionists
+        const totalReceptionists = await userModel.countDocuments({hospitalId, role: 'RECEPTIONIST'});
+
+        // Get today's OPD visits
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        const tomorrow = new Date(today);
+        tomorrow.setDate(tomorrow.getDate() + 1);
+
+        const todayOPDVisits = await opdModel.countDocuments({
+            hospitalId,
+            visitDate: { $gte: today, $lt: tomorrow }
+        });
+
+        // Get current IPD patients (admitted but not discharged)
+        const currentIPDPatients = await ipdModel.countDocuments({
+            hospitalId,
+            status: 'ADMITTED'
+        });
+
+        // Get total beds
+        const totalBeds = await bedModel.countDocuments({hospitalId});
+
+        // Get available beds
+        const availableBeds = await bedModel.countDocuments({
+            hospitalId,
+            status: 'VACANT'
+        });
+
+        res.status(200).json({
+            stats: {
+                totalPatients,
+                totalDoctors,
+                totalReceptionists,
+                todayOPDVisits,
+                currentIPDPatients,
+                totalBeds,
+                availableBeds,
+                bedOccupancyRate: totalBeds > 0 ? Math.round(((totalBeds - availableBeds) / totalBeds) * 100) : 0
+            }
+        })
+    } catch (error) {
+        res.status(500).json({
+            message:error.message
+        })
+    }
+}
+
 async function getHospital(req,res){
     try {
         const hospitalId = req.user.hospitalId;
@@ -254,7 +314,8 @@ module.exports = {
      getReceptionistById,
      getPatients,
      getAppointments,
-     getHospital
+     getHospital,
+     getHospitalStats
     }
 
 
