@@ -29,41 +29,68 @@ async function getQueue(req,res){
     }
 }
 
-async function updateOpd(req,res){
-    try {
-        const opdId  = req.params.id
-        const{diagnosis, generalExamination, investigation, medicines, notes, followUpDate } = req.body;
+async function updateOpd(req, res) {
+  try {
+    const opdId = req.params.id;
 
-        const opd = await opdModel.findOne({
-            _id:opdId,
-            doctorId:req.user.userId,
-            hospitalId:req.user.hospitalId
-        });
+    const {
+  diagnosis,
+  generalExamination,
+  investigation,
+  medicines,
+  notes,
+  followUpDate,
+  chiefComplaint,
+  onExamination,
+  procedure
+} = req.body;
 
-        if(!opd){
-            return res.status(404).json({
-                messae:"opd not found"
-            })
-        }
-        opd.diagnosis = diagnosis || opd.diagnosis;
-        opd.generalExamination = generalExamination || opd.generalExamination;
-        opd.investigation = investigation || opd.investigation
-        opd.medicines = medicines || opd.medicines;
-        opd.notes = notes || opd.notes;
-        opd.followUpDate = followUpDate || opd.followUpDate;
-        opd.status = "COMPLETED"
+    const opd = await opdModel.findOne({
+      _id: opdId,
+      doctorId: req.user.userId,
+      hospitalId: req.user.hospitalId
+    });
 
-       await opd.save();
-        res.status(200).json({
+    if (!opd) {
+      return res.status(404).json({
+        message: "OPD not found"
+      });
+    }
+
+    if (diagnosis !== undefined) opd.diagnosis = diagnosis;
+    if (generalExamination !== undefined) opd.generalExamination = generalExamination;
+    if (investigation !== undefined) opd.investigation = investigation;
+    if (notes !== undefined) opd.notes = notes;
+    if (followUpDate !== undefined) opd.followUpDate = followUpDate;
+    if (chiefComplaint !== undefined) opd.chiefComplaint = chiefComplaint;
+    if (onExamination !== undefined) opd.onExamination = onExamination;
+    if (procedure !== undefined) opd.procedure = procedure;
+
+    if (medicines && Array.isArray(medicines)) {
+      opd.medicines = medicines.map((m) => ({
+        type: m.type || "TAB", 
+        name: m.name,
+        dosage: m.dosage,
+        duration: m.duration
+      }));
+    }
+
+    opd.status = "COMPLETED";
+
+    console.log("Saving medicines:", opd.medicines);
+
+    await opd.save();
+
+    res.status(200).json({
       message: "OPD updated successfully",
       opd,
     });
 
-    } catch (error) {
-        res.status(500).json({
-            message:error.message
-        })
-    }
+  } catch (error) {
+    res.status(500).json({
+      message: error.message
+    });
+  }
 }
 
 async function getPatientHistory (req, res){
@@ -81,22 +108,40 @@ async function getPatientHistory (req, res){
   }
 };
 
-async function completedPatients(req,res){
-    try {
-        const patients = await opdModel.find({
-            hospitalId:req.user.hospitalId,
-            doctorId:req.user.userId,
-            status : "COMPLETED"
-        }).populate('patientId');
+async function completedPatients(req, res) {
+  try {
+    const hospitalId = req.user.hospitalId;
+    const doctorId = req.user.userId;
 
-        res.status(200).json({
-            patients
-        })
-    } catch (error) {
-        res.status(500).json({
-            message: error.message
-        })
-    }
+    // 🟢 Start of today
+    const startOfDay = new Date();
+    startOfDay.setHours(0, 0, 0, 0);
+
+    // 🔴 End of today
+    const endOfDay = new Date();
+    endOfDay.setHours(23, 59, 59, 999);
+
+    const patients = await opdModel.find({
+      hospitalId,
+      doctorId,
+      status: "COMPLETED",
+      visitDate: {
+        $gte: startOfDay,
+        $lte: endOfDay
+      }
+    })
+    .populate('patientId')
+    .sort({ visitDate: -1 }); // latest first (optional)
+
+    res.status(200).json({
+      patients
+    });
+
+  } catch (error) {
+    res.status(500).json({
+      message: error.message
+    });
+  }
 }
 
 async function todaysPatients(req,res){

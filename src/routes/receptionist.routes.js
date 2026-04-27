@@ -2,6 +2,7 @@ const express = require('express');
 const authMiddleware = require('../middleware/authMiddleware');
 const roleMiddleware = require('../middleware/roleMiddleware');
 const receptionistController = require('../controller/receptionist.controller');
+const appointmentRequestController = require('../controller/appointmentRequest.controller');
 
 
 const router = express.Router();
@@ -27,4 +28,16 @@ router.get('/doctorslist',authMiddleware,roleMiddleware.roleMiddleware("RECEPTIO
 
 //GET: pending Appointments
 router.get('/pending',authMiddleware,roleMiddleware.roleMiddleware("RECEPTIONIST"),receptionistController.pendingAppointments)
+
+//POST: combined route for register patient and register ipd
+router.post('/createVisit',authMiddleware,roleMiddleware.roleMiddleware("RECEPTIONIST"),receptionistController.createVisit)
+
+//patch: mark opd as paid
+router.patch('/opd/:id/payment',authMiddleware,roleMiddleware.roleMiddleware("RECEPTIONIST"),receptionistController.markAsPaid)
+
+// Appointment Request routes for Receptionist
+router.get('/appointment-requests', authMiddleware, roleMiddleware.roleMiddleware("RECEPTIONIST"), appointmentRequestController.getAppointmentRequests);
+router.patch('/appointment-requests/:id/approve', authMiddleware, roleMiddleware.roleMiddleware("RECEPTIONIST"), appointmentRequestController.approveRequest);
+router.patch('/appointment-requests/:id/reject', authMiddleware, roleMiddleware.roleMiddleware("RECEPTIONIST"), appointmentRequestController.rejectRequest);
+
 module.exports = router

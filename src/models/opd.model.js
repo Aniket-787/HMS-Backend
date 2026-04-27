@@ -65,18 +65,52 @@ const opdSchema = new mongoose.Schema(
     },
 
     medicines: [
-      {
-        name: String,
-        dosage: String,
-        duration: String,
-      },
-    ],
+  {
+    type: {
+      type: String,
+      enum: [
+        "TAB", "SYP", "CRM", "POW", "INJ", "CAP",
+        "DRP", "SUS", "LIQ", "SAC", "EXP", "OIN",
+        "GEN", "LOT", "GEL", "GRA", "SOAP", "SOL",
+        "VAC", "PAS", "INH", "OTH"
+      ],
+      default: "TAB",
+    },
+
+    name: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
+    dosage: {
+      type: String,
+      trim: true,
+    },
+
+    duration: {
+      type: String,
+      trim: true,
+    },
+  },
+],
+
+chiefComplaint: {
+  type: String
+},
+
+onExamination: {
+  type: String
+},
+
+procedure: {
+  type: String
+},
 
     notes: {
       type: String,
     },
 
-    // 🔥 VERY IMPORTANT (your logic)
     followUpDate: {
       type: Date,
     },

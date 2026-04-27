@@ -2,6 +2,7 @@ const opdModel = require("../models/opd.model");
 const patientModel = require("../models/patient.model");
 const userModel = require("../models/user.model");
 const hospitalModel = require("../models/hospital.model");
+const mongoose = require("mongoose");
 async function registerPatient(req, res) {
   try {
     const {
@@ -249,6 +250,128 @@ async function pendingAppointments(req,res){
     })
   }
 }
+
+async function createVisit(req, res) {
+  const session = await mongoose.startSession();
+  session.startTransaction();
+
+  try {
+    const {
+      patientData,
+      opdData
+    } = req.body;
+
+    const hospitalId = req.user.hospitalId;
+
+    let patientId;
+
+    let patient = await patientModel.findOne({
+      phone: patientData.phone,
+      hospitalId
+    }).session(session);
+
+    if (!patient) {
+    
+      const hospital = await hospitalModel.findById(hospitalId).session(session);
+      const count = await patientModel.countDocuments({ hospitalId }).session(session);
+
+      const nextNumber = count + 1;
+      const uhid = `${hospital.hospitalCode}-${String(nextNumber).padStart(4, "0")}`;
+
+      const newPatient = await patientModel.create([{
+        ...patientData,
+        hospitalId,
+        uhid
+      }], { session });
+
+      patient = newPatient[0];
+    }
+
+    patientId = patient._id;
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const doctor = await userModel.findById(opdData.doctorId).session(session);
+
+    if (!doctor) {
+      throw new Error("Doctor not found");
+    }
+
+    const lastOPD = await opdModel
+      .findOne({
+        doctorId: opdData.doctorId,
+        hospitalId,
+        visitDate: { $gte: today }
+      })
+      .sort({ tokenNumber: -1 })
+      .session(session);
+
+    const tokenNumber = lastOPD ? lastOPD.tokenNumber + 1 : 1;
+    
+    const lastPatientOPD = await opdModel
+      .findOne({
+        patientId,
+        doctorId: opdData.doctorId,
+        hospitalId
+      })
+      .sort({ createdAt: -1 })
+      .session(session);
+
+    let amount = doctor.profile?.consultationFee || 0;
+
+    if (lastPatientOPD && lastPatientOPD.followUpDate) {
+      const validTill = new Date(lastPatientOPD.followUpDate);
+      validTill.setDate(validTill.getDate() + 10);
+
+      if (new Date() <= validTill) {
+        amount = doctor.profile?.followUpFee || 0;
+      }
+    }
+
+    const opd = await opdModel.create([{
+      patientId,
+      doctorId: opdData.doctorId,
+      hospitalId,
+      tokenNumber,
+      symptoms: opdData.symptoms,
+      amount,
+      paymentStatus: opdData.paymentStatus || "UNPAID"
+    }], { session });
+
+    await session.commitTransaction();
+
+    res.status(201).json({
+      message: "Visit created successfully",
+      patient,
+      opd: opd[0]
+    });
+
+  } catch (error) {
+    await session.abortTransaction();
+
+    res.status(500).json({
+      message: error.message
+    });
+  }
+}
+ 
+
+async function markAsPaid(req, res) {
+  try {
+    const opd = await opdModel.findById(req.params.id);
+
+    if (!opd) return res.status(404).json({ message: "Not found" });
+
+    opd.paymentStatus = "PAID";
+    await opd.save();
+
+    res.json({ message: "Payment updated", opd });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+}
+
 module.exports = {
   registerPatient,
   registerOPD,
@@ -257,5 +380,7 @@ module.exports = {
   getPatientList,
   getOpdById,
   getDoctors,
-  pendingAppointments
+  pendingAppointments,
+  createVisit,
+  markAsPaid
 };
