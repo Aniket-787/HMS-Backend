@@ -4,8 +4,7 @@ const opdModel = require("../models/opd.model");
 const hospitalModel = require("../models/hospital.model");
 const userModel = require("../models/user.model");
 const mongoose = require("mongoose");
-const sendSMS = require('../services/sendWhatsApp');
-const { appointmentApproved } = require('../services/messageTemplates');
+
 // Create a new appointment request
 async function createAppointmentRequest(req, res) {
   try {

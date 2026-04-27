@@ -1,6 +1,6 @@
 const express = require('express');
 const appointmentRequestController = require('../controller/appointmentRequest.controller');
-const sendWhatsApp = require('../services/sendWhatsApp');
+
 
 const router = express.Router();
 
