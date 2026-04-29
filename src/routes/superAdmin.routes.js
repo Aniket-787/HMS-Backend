@@ -2,7 +2,7 @@ const express = require('express');
 const authMiddleware = require('../middleware/authMiddleware');
 const roleMiddleware = require('../middleware/roleMiddleware');
 const superAdminController = require('../controller/superAdmin.controller')
-const upload = require('../middleware/multer.middleware');
+const multerMiddleware = require('../middleware/multer.middleware');
 
 const router = express.Router();
 
@@ -29,6 +29,6 @@ router.get('/admins',authMiddleware,roleMiddleware.roleMiddleware("SUPER_ADMIN")
 router.get('/allpatients',authMiddleware,roleMiddleware.roleMiddleware("SUPER_ADMIN"),superAdminController.getAllPatients)
 
 //upload hospital logo
-router.put("/hospital/upload-logo",authMiddleware,roleMiddleware.roleMiddleware("SUPER_ADMIN","ADMIN"),upload.single("logo"),superAdminController.uploadHospitalLogo);
+router.put("/hospital/upload-logo",authMiddleware,roleMiddleware.roleMiddleware("SUPER_ADMIN","ADMIN"),multerMiddleware.upload.single("logo"),superAdminController.uploadHospitalLogo);
 
 module.exports = router;

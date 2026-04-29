@@ -1,4 +1,5 @@
 const express = require('express');
+const path = require('path');
 const authRoutes = require('./routes/authRoutes');
 const superAdminRoutes = require('./routes/superAdmin.routes');
 const adminRoutes = require('./routes/admin.routes');
@@ -8,6 +9,7 @@ const doctorRoutes = require('./routes/doctor.routes')
 const revenueRoutes = require('./routes/revenue.routes')
 const appointmentRequestRoutes = require('./routes/appointmentRequest.routes');
 const reportsRoutes = require('./routes/reports.routes');
+const supportRoutes = require('./routes/support.routes');
 const hospitalModel = require('./models/hospital.model');
 const QRCode = require('qrcode');
 const cookieParser = require('cookie-parser');
@@ -17,10 +19,13 @@ const app = express();
 app.use(express.json());
 app.use(cookieParser());
 
+// Serve uploaded files
+app.use('/uploads', express.static(path.join(__dirname, '..', 'uploads')));
+
 app.use(cors({
   origin: [
     "https://hms-frontend-black.vercel.app",
-    // "http://localhost:3001"
+    "http://localhost:3001"
   ],
   credentials: true
 }));
@@ -28,6 +33,8 @@ app.use(cors({
 
 //routes
 app.use('/api/auth',authRoutes)
+app.use('/api/user', require('./routes/user.routes'))
+app.use('/api/notifications', require('./routes/notification.routes'))
 app.use('/api/superAdmin',superAdminRoutes)
 app.use('/api/admin',adminRoutes)
 app.use('/api/receptionist',receptionistRoutes)
@@ -36,6 +43,7 @@ app.use('/api/discharge',dischargeSummeryRoutes)
 app.use('/api/analytics',revenueRoutes)
 app.use('/api/appointment-request', appointmentRequestRoutes)
 app.use('/api/reports', reportsRoutes)
+app.use('/api/support', supportRoutes)
 
 // QR Code Generator - Get QR code for a hospital
 app.get('/api/hospital/:id/qrcode', async (req, res) => {

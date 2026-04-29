@@ -212,7 +212,9 @@ async function getAppointments(req,res){
         const today = new Date();
         today.setHours(0,0,0,0)
 
-        const opd = await opdModel.find({hospitalId:req.user.hospitalId, visitDate: { $gte: today }});
+        const opd = await opdModel.find({hospitalId:req.user.hospitalId, visitDate: { $gte: today }})
+            .populate('patientId', 'name uhid')
+            .sort({ tokenNumber: 1 });
 
         res.status(200).json({
             opd

@@ -58,6 +58,9 @@ const userSchema = new mongoose.Schema(
     profile: {
       specialization: String,
       experience: Number,
+      address: String,
+      bio: String,
+      avatar: String, // Profile picture URL
 
       // 💰 fees moved here
       consultationFee: {

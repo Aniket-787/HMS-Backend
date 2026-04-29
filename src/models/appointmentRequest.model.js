@@ -11,6 +11,9 @@ const appointmentRequestSchema = new mongoose.Schema({
     required: true,
     trim: true
   },
+  email:{
+    type:String
+  },
   age: {
     type: Number
   },
@@ -31,6 +34,10 @@ const appointmentRequestSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User'
   },
+  appointmentDate: {
+    type: Date,
+    required: true
+  },
   status: {
     type: String,
     enum: ['PENDING', 'APPROVED', 'REJECTED'],
@@ -45,7 +52,7 @@ const appointmentRequestSchema = new mongoose.Schema({
 });
 
 // Index for efficient queries
-appointmentRequestSchema.index({ hospitalId: 1, createdAt: -1 });
-appointmentRequestSchema.index({ status: 1 });
+appointmentRequestSchema.index({ hospitalId: 1, appointmentDate: 1 });
+appointmentRequestSchema.index({ status: 1, appointmentDate: 1 });
 
 module.exports = mongoose.model('AppointmentRequest', appointmentRequestSchema);

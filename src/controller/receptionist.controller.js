@@ -239,7 +239,9 @@ async function pendingAppointments(req,res){
   try {
     const today = new Date();
     today.setHours(0,0,0,0)
-     const pending = await opdModel.find({hospitalId:req.user.hospitalId, status:"WAITING", visitDate: {$gte: today} }) || 0;
+     const pending = await opdModel.find({hospitalId:req.user.hospitalId, status:"WAITING", visitDate: {$gte: today} })
+      .populate('patientId', 'name uhid')
+      .sort({ tokenNumber: 1 });
 
      res.status(200).json({
       pending

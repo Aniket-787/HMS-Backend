@@ -1,4 +1,5 @@
 require('dotenv').config();
+// require("./jobs/appointmentCleanup");
 const app = require('./src/app');
 const connectDB = require('./src/db/db')
 const seedSuperAdmin = require('./src/seed/seed')
