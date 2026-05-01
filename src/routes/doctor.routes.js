@@ -76,4 +76,20 @@ router.put(
   ipdController.dischargePatient
 );
 
+//GET: Consent Form Data
+router.get(
+  "/ipd/:ipdId/consent-form",
+  authMiddleware,
+  roleMiddleware.roleMiddleware("DOCTOR", "ADMIN", "RECEPTIONIST"),
+  ipdController.getConsentFormData
+);
+
+//PUT: Save Consent Form Data
+router.put(
+  "/ipd/:ipdId/consent-form",
+  authMiddleware,
+  roleMiddleware.roleMiddleware("DOCTOR", "ADMIN", "RECEPTIONIST"),
+  ipdController.saveConsentFormData
+);
+
 module.exports = router

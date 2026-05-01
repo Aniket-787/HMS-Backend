@@ -58,8 +58,21 @@ async function registerPatient(req, res) {
 
 async function getPatient(req,res){
     try {
-        const { phone } = req.query;
-        const patient = await patientModel.findOne({phone});
+        const { query } = req.query;
+        const hospitalId = req.user.hospitalId;
+
+        if (!query) {
+          return res.status(400).json({ message: 'Search query is required' });
+        }
+
+        const patient = await patientModel.findOne({
+          hospitalId,
+          $or: [
+            { phone: query },
+            { uhid: query }
+          ]
+        });
+
         if(!patient){
             return res.status(404).json({
                 message:"Patient not found!"
@@ -374,6 +387,61 @@ async function markAsPaid(req, res) {
   }
 }
 
+async function updateOpdRecord(req, res) {
+  try {
+    const { id } = req.params;
+    const { symptoms } = req.body;
+
+    const opd = await opdModel.findOne({ _id: id, hospitalId: req.user.hospitalId });
+    if (!opd) {
+      return res.status(404).json({ message: 'OPD record not found' });
+    }
+
+    if (symptoms !== undefined) opd.symptoms = symptoms;
+    await opd.save();
+
+    res.status(200).json({ message: 'OPD record updated successfully', opd });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+}
+
+async function updatePatient(req, res) {
+  try {
+    const { id } = req.params;
+    const updateData = req.body;
+    const hospitalId = req.user.hospitalId;
+
+    // Find patient and ensure it belongs to the hospital
+    const patient = await patientModel.findOne({ _id: id, hospitalId });
+    if (!patient) {
+      return res.status(404).json({
+        message: "Patient not found"
+      });
+    }
+
+    // Prevent updating UHID and hospitalId
+    delete updateData.uhid;
+    delete updateData.hospitalId;
+
+    // Update patient
+    const updatedPatient = await patientModel.findByIdAndUpdate(
+      id,
+      updateData,
+      { new: true, runValidators: true }
+    );
+
+    res.status(200).json({
+      message: "Patient updated successfully",
+      patient: updatedPatient
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: error.message
+    });
+  }
+}
+
 module.exports = {
   registerPatient,
   registerOPD,
@@ -384,5 +452,7 @@ module.exports = {
   getDoctors,
   pendingAppointments,
   createVisit,
-  markAsPaid
+  markAsPaid,
+  updatePatient,
+  updateOpdRecord
 };

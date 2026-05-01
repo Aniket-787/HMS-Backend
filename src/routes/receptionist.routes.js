@@ -35,6 +35,12 @@ router.post('/createVisit',authMiddleware,roleMiddleware.roleMiddleware("RECEPTI
 //patch: mark opd as paid
 router.patch('/opd/:id/payment',authMiddleware,roleMiddleware.roleMiddleware("RECEPTIONIST"),receptionistController.markAsPaid)
 
+// PUT: update OPD symptoms from receptionist line
+router.put('/opd/:id', authMiddleware, roleMiddleware.roleMiddleware("RECEPTIONIST"), receptionistController.updateOpdRecord)
+
+// PUT: update patient
+router.put('/patient/:id',authMiddleware,roleMiddleware.roleMiddleware("RECEPTIONIST"),receptionistController.updatePatient)
+
 // Appointment Request routes for Receptionist
 router.get('/appointment-requests', authMiddleware, roleMiddleware.roleMiddleware("RECEPTIONIST"), appointmentRequestController.getAppointmentRequests);
 router.patch('/appointment-requests/:id/approve', authMiddleware, roleMiddleware.roleMiddleware("RECEPTIONIST"), appointmentRequestController.approveRequest);

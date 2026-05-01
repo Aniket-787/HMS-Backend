@@ -229,4 +229,96 @@ async function dischargePatient(req, res) {
 }
 
 
-module.exports = { admitPatient, getAdmittedPatients, getDischargePatients, addDailyNotes, addCharges, dischargePatient }
+async function saveConsentFormData(req, res) {
+  try {
+    const { ipdId } = req.params;
+    const hospitalId = req.user.hospitalId;
+    const consentPayload = req.body;
+
+    const ipd = await ipdModel.findById(ipdId);
+
+    if (!ipd) {
+      return res.status(404).json({ message: "IPD record not found" });
+    }
+
+    if (ipd.hospitalId.toString() !== hospitalId) {
+      return res.status(403).json({ message: "Unauthorized access" });
+    }
+
+    ipd.consentForm = consentPayload;
+    await ipd.save();
+
+    res.status(200).json({
+      message: "Consent form saved successfully",
+      consentForm: ipd.consentForm,
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+}
+
+async function getConsentFormData(req, res) {
+  try {
+    const { ipdId } = req.params;
+    const hospitalId = req.user.hospitalId;
+
+    // Get IPD record with patient and doctor details
+    const ipd = await ipdModel
+      .findById(ipdId)
+      .populate('patientId')
+      .populate('doctorId', 'name')
+      .populate('hospitalId');
+
+    if (!ipd) {
+      return res.status(404).json({ message: "IPD record not found" });
+    }
+
+    // Verify hospital ownership
+    if (ipd.hospitalId._id.toString() !== hospitalId) {
+      return res.status(403).json({ message: "Unauthorized access" });
+    }
+
+    // Get hospital details
+    const hospitalModel = require('../models/hospital.model');
+    const hospital = await hospitalModel.findById(hospitalId);
+
+    if (!hospital) {
+      return res.status(404).json({ message: "Hospital not found" });
+    }
+
+    // Format response with all required data
+    const formData = {
+      hospital: {
+        name: hospital.name,
+        logo: hospital.logo,
+        registrationNumber: hospital.hospitalCode || '',
+        address: hospital.address,
+        phone: hospital.phone,
+        email: hospital.email,
+      },
+      patient: {
+        name: ipd.patientId?.name || '',
+        uhid: ipd.uhid || '',
+        address: ipd.patientId?.address || '',
+        phone: ipd.patientId?.phone || '',
+      },
+      ipd: {
+        ipdNumber: ipd.ipdNumber || '',
+        admissionDate: ipd.admissionDate,
+        diagnosis: ipd.diagnosis || '',
+        doctorName: ipd.doctorId?.name || '',
+      },
+      consentForm: ipd.consentForm || null,
+    };
+
+    res.status(200).json({
+      message: "Consent form data retrieved",
+      data: formData,
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+}
+
+
+module.exports = { admitPatient, getAdmittedPatients, getDischargePatients, addDailyNotes, addCharges, dischargePatient, getConsentFormData, saveConsentFormData }

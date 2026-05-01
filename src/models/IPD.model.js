@@ -133,6 +133,25 @@ const ipdSchema = new mongoose.Schema(
 
     // 🧾 discharge summary
     dischargeSummary: String,
+
+    consentForm: {
+      relativeOrGuardianName: String,
+      relation: String,
+      address: String,
+      taluka: String,
+      district: String,
+      phone: String,
+      admissionDate: Date,
+      admissionTime: String,
+      admissionAMPM: String,
+      diagnosis: String,
+      section1Consent: String,
+      section1YaAgree: String,
+      section2Consent: String,
+      section2OutOfPocket: String,
+      signatureHolderName: String,
+      relationshipToPatient: String,
+    },
   },
   {
     timestamps: true,

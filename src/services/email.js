@@ -1,44 +1,22 @@
-const nodemailer = require('nodemailer');
+require("dotenv").config();
+const { Resend } = require("resend");
 
-const transporter = nodemailer.createTransport({
-  host: "smtp.gmail.com",
-  port: 587,
-  secure: true,
-  auth: {
-    type: "OAuth2",
-    user: process.env.EMAIL_USER,
-    clientId: process.env.CLIENT_ID,
-    clientSecret: process.env.CLIENT_SECRET,
-    refreshToken: process.env.REFRESH_TOKEN
-  },
-  connectionTimeout: 30000,
-  greetingTimeout: 30000,
-  socketTimeout: 30000
-});
+const resend = new Resend(process.env.RESEND_API_KEY);
 
-// Verify the connection configuration
-transporter.verify((error, success) => {
-  if (error) {
-    console.error('Error connecting to email server:', error);
-  } else {
-    console.log('Email server is ready to send messages');
-  }
-});
-
-
-// Function to send email
 const sendEmail = async (to, subject, html) => {
   try {
-    const info = await transporter.sendMail({
-      from: `"HealthClub" <${process.env.EMAIL_USER}>`,
+    const data = await resend.emails.send({
+      from: "JP Health Tech <onboarding@resend.dev>",
       to,
       subject,
-      html
+      html,
     });
 
-    console.log("Message sent:", info.messageId);
+    console.log("Email sent:", data);
+    return data;
   } catch (error) {
-    console.error("Error sending email:", error);
+    console.error("Email error:", error);
+    throw error;
   }
 };
 
